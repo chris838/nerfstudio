@@ -72,7 +72,7 @@ class NerfplayerNGPModelConfig(InstantNGPModelConfig):
     """Hashing grid parameter."""
     temporal_tv_weight: float = 1
     """Temporal TV loss balancing weight for feature channels."""
-    depth_weight: float = 1e-1
+    depth_weight: float = 0
     """depth loss balancing weight for feature channels."""
     train_background_color: Literal["random", "black", "white"] = "random"
     """The training background color that is given to untrained areas."""
