@@ -87,6 +87,7 @@ class Nerfstudio(DataParser):
         mask_filenames = []
         depth_filenames = []
         poses = []
+        times = []
         num_skipped_image_filenames = 0
 
         fx_fixed = "fl_x" in meta
@@ -147,6 +148,8 @@ class Nerfstudio(DataParser):
 
             image_filenames.append(fname)
             poses.append(np.array(frame["transform_matrix"]))
+            if "time" in frame:
+              times.append(frame["time"])
             if "mask_path" in frame:
                 mask_filepath = PurePath(frame["mask_path"])
                 mask_fname = self._get_fname(
@@ -180,6 +183,12 @@ class Nerfstudio(DataParser):
         ), """
         Different number of image and depth filenames.
         You should check that depth_file_path is specified for every frame (or zero frames) in transforms.json.
+        """
+        assert len(times) == 0 or (
+            len(times) == len(image_filenames)
+        ), """
+        Time field exists for some frames but not others.
+        You should check that time is specified for every frame (or zero frames) in transforms.json.
         """
 
         # filter image_filenames and poses based on train/eval split percentage
@@ -225,6 +234,11 @@ class Nerfstudio(DataParser):
         mask_filenames = [mask_filenames[i] for i in indices] if len(mask_filenames) > 0 else []
         depth_filenames = [depth_filenames[i] for i in indices] if len(depth_filenames) > 0 else []
         poses = poses[indices]
+        if len(times) > 0:
+          times = [times[i] for i in indices]
+          times = torch.tensor(times, dtype=torch.float32)
+        else:
+          times = None
 
         # in x,y,z order
         # assumes that the scene is centered at the origin
@@ -269,6 +283,7 @@ class Nerfstudio(DataParser):
             width=width,
             camera_to_worlds=poses[:, :3, :4],
             camera_type=camera_type,
+            times=times,
         )
 
         assert self.downscale_factor is not None
