@@ -116,7 +116,16 @@ class CacheDataloader(DataLoader):
         """Returns a collated batch."""
         batch_list = self._get_batch_list()
         collated_batch = self.collate_fn(batch_list)
-        collated_batch = get_dict_to_torch(collated_batch, device=self.device, exclude=["image"])
+        
+        # Works fine, so long as no mask
+        #collated_batch = get_dict_to_torch(collated_batch, device=self.device, exclude=["image"])
+        
+        # Works with mask but requires large GPU memory
+        collated_batch = get_dict_to_torch(collated_batch, device=self.device)
+        
+        # Works with mask, slow
+        #collated_batch = get_dict_to_torch(collated_batch, device=self.device, exclude=["image", "mask"])
+
         return collated_batch
 
     def __iter__(self):
