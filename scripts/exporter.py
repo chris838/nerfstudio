@@ -407,6 +407,69 @@ class ExportCameraPoses(Exporter):
 
             CONSOLE.print(f"[bold green]:white_check_mark: Saved poses to {output_file_path}")
 
+@dataclass
+class ExportOptimizedCameraPoses(Exporter):
+    """
+    Export optimized camera poses to a .json file.
+    """
+
+    def adjust_c2w(self, camera_optimizer, dataset):
+        """Extract the adjusted poses from the model"""
+
+        c2w = dataset.cameras.camera_to_worlds
+
+        num_cameras = len(dataset.cameras)
+        indices = torch.ones(num_cameras, dtype=torch.bool)
+        camera_opt_to_camera = camera_optimizer(indices=indices)
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        c2w = c2w.to(device)
+        camera_opt_to_camera = camera_opt_to_camera.to(device)
+
+        return pose_utils.multiply(c2w, camera_opt_to_camera)
+        
+
+    def main(self) -> None:
+        """Export optimized camera poses"""
+        if not self.output_dir.exists():
+            self.output_dir.mkdir(parents=True)
+
+        config, pipeline, _, _ = eval_setup(self.load_config)
+        assert isinstance(pipeline, VanillaPipeline)
+
+        assert hasattr(config.pipeline.datamanager, "camera_optimizer")
+        if config.pipeline.datamanager.camera_optimizer.mode == 'off':
+            CONSOLE.print(f"[bold yellow]Camera optimizer is 'off', exporting original poses.")
+        else:
+
+            train_camera_optimizer = pipeline.datamanager.train_camera_optimizer
+            train_dataset = pipeline.datamanager.train_dataset
+            train_c2w_adjusted = self.adjust_c2w(train_camera_optimizer, train_dataset)
+
+            eval_camera_optimizer = pipeline.datamanager.eval_camera_optimizer
+            eval_dataset = pipeline.datamanager.eval_dataset
+            eval_c2w_adjusted = self.adjust_c2w(eval_camera_optimizer, eval_dataset)
+
+            # Write adjusted cameras back to input dataset within the pipeline
+            pipeline.datamanager.train_dataset.cameras.camera_to_worlds = train_c2w_adjusted
+            pipeline.datamanager.eval_dataset.cameras.camera_to_worlds = eval_c2w_adjusted
+
+        # Run the typical camera export code to create output json
+        train_frames, eval_frames = collect_camera_poses(pipeline)
+
+        for file_name, frames in [("transforms_train.json", train_frames), ("transforms_eval.json", eval_frames)]:
+            if len(frames) == 0:
+                CONSOLE.print(f"[bold yellow]No frames found for {file_name}. Skipping.")
+                continue
+
+            output_file_path = os.path.join(self.output_dir, file_name)
+
+            with open(output_file_path, "w", encoding="UTF-8") as f:
+                json.dump(frames, f, indent=4)
+
+            CONSOLE.print(f"[bold green]:white_check_mark: Saved poses to {output_file_path}")
+
+
 
 Commands = tyro.conf.FlagConversionOff[
     Union[
@@ -415,6 +478,7 @@ Commands = tyro.conf.FlagConversionOff[
         Annotated[ExportPoissonMesh, tyro.conf.subcommand(name="poisson")],
         Annotated[ExportMarchingCubesMesh, tyro.conf.subcommand(name="marching-cubes")],
         Annotated[ExportCameraPoses, tyro.conf.subcommand(name="cameras")],
+        Annotated[ExportOptimizedCameraPoses, tyro.conf.subcommand(name="optimised-cameras")],
     ]
 ]
 
