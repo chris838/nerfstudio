@@ -6,13 +6,14 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { useDispatch } from 'react-redux';
-import { drawCamera, drawSceneBox } from './drawing';
+import { drawMesh, drawCamera, drawSceneBox } from './drawing';
 
 import { CameraHelper } from '../SidePanel/CameraPanel/CameraHelper';
 import SceneNode from '../../SceneNode';
 import { subscribe_to_changes } from '../../subscriber';
 import { snap_to_camera } from '../SidePanel/SidePanel';
 
+const MESH_NAME = 'Mesh';
 const SCENE_BOX_NAME = 'Scene Box';
 const CAMERAS_NAME = 'Training Cameras';
 
@@ -229,8 +230,27 @@ export function get_scene_tree() {
   // Lights
   const color = 0xffffff;
   const intensity = 1;
-  const light = new THREE.AmbientLight(color, intensity);
-  sceneTree.set_object_from_path(['Light'], light);
+  const light1 = new THREE.DirectionalLight(color, intensity);
+  light1.position.set(0, 0, 1);
+  const light2 = new THREE.DirectionalLight(color, intensity);
+  light2.position.set(0, 0, -1);
+  sceneTree.set_object_from_path(['Light 1'], light1);
+  sceneTree.set_object_from_path(['Light 2'], light2);
+
+  // draw mesh
+  const selector_fn_mesh = (state) => {
+    return state.sceneState.mesh;
+  };
+  const fn_value_mesh = (previous, current) => {
+    if (current !== null) {
+      const mesh = drawMesh(current);
+      sceneTree.set_object_from_path([MESH_NAME], mesh);
+      console.log(sceneTree)
+    } else {
+      sceneTree.delete([MESH_NAME]);
+    }
+  };
+  subscribe_to_changes(selector_fn_mesh, fn_value_mesh);
 
   // draw scene box
   const selector_fn_scene_box = (state) => {

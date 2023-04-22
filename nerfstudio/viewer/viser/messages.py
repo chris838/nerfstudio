@@ -22,7 +22,8 @@ from typing import Any, Tuple
 
 import viser.infra
 from typing_extensions import Literal, override
-
+import numpy as onp
+import numpy.typing as onpt
 
 class NerfstudioMessage(viser.infra.Message):
     """Base message type for controlling our viewer."""
@@ -30,6 +31,25 @@ class NerfstudioMessage(viser.infra.Message):
     @override
     def redundancy_key(self) -> str:
         return type(self).__name__
+
+
+
+@dataclasses.dataclass
+class MeshMessage(NerfstudioMessage):
+    """Mesh message.
+
+    Vertices are internally canonicalized to float32, faces to uint32."""
+
+    name: str
+    vertices: onpt.NDArray[onp.float32]
+    faces: onpt.NDArray[onp.uint32]
+    color: int
+    wireframe: bool
+
+    def __post_init__(self):
+        # Check shapes.
+        assert self.vertices.shape[-1] == 3
+        assert self.faces.shape[-1] == 3
 
 
 @dataclasses.dataclass

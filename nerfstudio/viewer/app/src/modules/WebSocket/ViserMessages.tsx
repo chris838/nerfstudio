@@ -1,5 +1,14 @@
 // AUTOMATICALLY GENERATED message interfaces, from Python dataclass definitions.
 // This file should not be manually modified.
+type ArrayBuffer = Uint8Array;
+interface MeshMessage {
+  type: "MeshMessage";
+  name: string;
+  vertices: Array;
+  faces: Array;
+  color: number;
+  wireframe: boolean;
+}
 interface BackgroundImageMessage {
   type: 'BackgroundImageMessage';
   media_type: 'image/jpeg' | 'image/png';
@@ -118,6 +127,7 @@ interface TimeConditionMessage {
 }
 
 export type Message =
+  | MeshMessage
   | BackgroundImageMessage
   | GuiAddMessage
   | GuiRemoveMessage

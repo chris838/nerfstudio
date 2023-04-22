@@ -55,6 +55,15 @@ function handleMessage(
   store: Store,
 ) {
   switch (message.type) {
+    // Add mesh
+    case 'MeshMessage': {
+      dispatch({
+        type: 'write',
+        path: 'sceneState/mesh',
+        data: message,
+      });
+      break;
+    }
     // Add a background image.
     case 'BackgroundImageMessage': {
       document

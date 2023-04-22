@@ -1,7 +1,52 @@
 /* eslint-disable no-restricted-syntax */
 // ---- code for drawing with three.js ----
 import * as THREE from 'three';
-import { SceneBoxMessage } from '../WebSocket/ViserMessages';
+import { SceneBoxMessage, MeshMessage } from '../WebSocket/ViserMessages';
+
+export function drawMesh(message: MeshMessage): THREE.Object3D {
+  const geometry = new THREE.BufferGeometry();
+  // TODO(hangg): Should expose color as well.
+  // transparent lambert material
+  const material = new THREE.MeshLambertMaterial({
+    color: 0xffffff,
+    wireframe: false,
+    transparent: false,
+    opacity: 1.0,
+});
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(
+      new Float32Array(
+        message.vertices.buffer.slice(
+          message.vertices.byteOffset,
+          message.vertices.byteOffset + message.vertices.byteLength
+        )
+      ),
+      3
+    )
+  );
+  geometry.setIndex(
+    new THREE.Uint32BufferAttribute(
+      new Uint32Array(
+        message.faces.buffer.slice(
+          message.faces.byteOffset,
+          message.faces.byteOffset + message.faces.byteLength
+        )
+      ),
+      1
+    )
+  );
+  geometry.computeVertexNormals();
+  geometry.computeBoundingSphere();
+
+  // const mesh = new THREE.Mesh(geometry, material);
+  // const cube_geometry = new THREE.BoxGeometry( 1, 1, 1 );
+  // const cube_material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+  // const mesh = new THREE.Mesh( cube_geometry, cube_material );
+  const mesh = new THREE.Mesh(geometry, material);
+
+  return mesh;
+}
 
 export function drawSceneBox(sceneBox: SceneBoxMessage): THREE.Object3D {
   const box = sceneBox;

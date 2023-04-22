@@ -44,6 +44,10 @@ import numpy.typing as onpt
 from typing_extensions import Literal, LiteralString, ParamSpec, assert_never
 
 from nerfstudio.data.scene_box import SceneBox
+from ._scene_handle import (
+    SceneNodeHandle,
+    _SceneNodeHandleState,
+)
 
 from . import messages
 from .gui import GuiHandle, GuiSelectHandle, _GuiHandleState
@@ -64,6 +68,21 @@ def _colors_to_uint8(colors: onp.ndarray) -> onpt.NDArray[onp.uint8]:
         if onp.issubdtype(colors.dtype, onp.integer):
             colors = onp.clip(colors, 0, 255).astype(onp.uint8)
     return colors
+
+
+def _encode_rgb(
+    rgb: Tuple[int, int, int]
+    | Tuple[float, float, float]
+    | onp.ndarray = (80, 120, 255),
+) -> int:
+    if isinstance(rgb, onp.ndarray):
+        assert rgb.shape == (3,)
+    rgb_fixed = tuple(
+        value if onp.issubdtype(type(value), onp.integer) else int(value * 255)
+        for value in rgb
+    )
+    assert len(rgb_fixed) == 3
+    return int(rgb_fixed[0] * (256**2) + rgb_fixed[1] * 256 + rgb_fixed[2])
 
 
 def _encode_image_base64(
@@ -389,6 +408,29 @@ class MessageApi(abc.ABC):
                 rgba_dict["a"],
             ),
         )
+
+    def add_mesh(
+        self,
+        name: str,
+        vertices: onp.ndarray,
+        faces: onp.ndarray,
+        color: Tuple[int, int, int]
+        | Tuple[float, float, float]
+        | onp.ndarray = (90, 200, 255),
+        wireframe: bool = False,
+    ) -> SceneNodeHandle:
+        """Add a mesh to the scene."""
+        self._queue(
+            messages.MeshMessage(
+                name,
+                vertices.astype(onp.float32),
+                faces.astype(onp.uint32),
+                # (255, 255, 255) => 0xffffff, etc
+                color=_encode_rgb(color),
+                wireframe=wireframe,
+            )
+        )
+        return SceneNodeHandle(_SceneNodeHandleState(name, self))
 
     def set_background_image(
         self,
