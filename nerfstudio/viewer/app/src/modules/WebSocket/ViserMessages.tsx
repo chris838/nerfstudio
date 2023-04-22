@@ -4,8 +4,8 @@ type ArrayBuffer = Uint8Array;
 interface MeshMessage {
   type: "MeshMessage";
   name: string;
-  vertices: Array;
-  faces: Array;
+  vertices: ArrayBuffer;
+  faces: ArrayBuffer;
   color: number;
   wireframe: boolean;
 }
