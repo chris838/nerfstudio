@@ -21,12 +21,12 @@ from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 import torch
+import trimesh
 from rich import box, style
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from typing_extensions import Literal
-import trimesh
 
 from nerfstudio.configs import base_config as cfg
 from nerfstudio.data.datasets.base_dataset import InputDataset
@@ -298,11 +298,13 @@ class ViewerState:
         self.viser_server.update_scene_box(dataset.scene_box)
 
         # draw the mesh
-        mesh = trimesh.load_mesh("skull.ply")
-        assert isinstance(mesh, trimesh.Trimesh)
-        vertices = mesh.vertices
-        faces = mesh.faces
-        self.viser_server.add_mesh(name="/mesh", vertices=vertices, faces=faces)
+        if "mesh_filename" in dataset.metadata:
+            mesh_filename = dataset.metadata["mesh_filename"]
+            mesh = trimesh.load_mesh(mesh_filename)
+            assert isinstance(mesh, trimesh.Trimesh)
+            vertices = mesh.vertices
+            faces = mesh.faces
+            self.viser_server.add_mesh(name="/mesh", vertices=vertices, faces=faces)
 
         # set the initial state whether to train or not
         self.train_btn_state = train_state
