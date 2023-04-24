@@ -246,7 +246,7 @@ class Trainer:
                         avg_over_steps=True,
                     )
 
-                self._update_viewer_state(step)
+                self._update_viewer_state(step, metrics_dict)
 
                 # a batch of train rays
                 if step_check(step, self.config.logging.steps_per_log, run_at_zero=True):
@@ -310,7 +310,7 @@ class Trainer:
         )
 
     @check_viewer_enabled
-    def _update_viewer_state(self, step: int) -> None:
+    def _update_viewer_state(self, step: int, metrics_dict: dict) -> None:
         """Updates the viewer state by rendering out scene with current pipeline
         Returns the time taken to render scene.
 
@@ -321,6 +321,7 @@ class Trainer:
         num_rays_per_batch: int = self.pipeline.datamanager.get_train_rays_per_batch()
         try:
             self.viewer_state.update_scene(step, num_rays_per_batch)
+            self.viewer_state.update_metrics(metrics_dict)
         except RuntimeError:
             time.sleep(0.03)  # sleep to allow buffer to reset
             CONSOLE.log("Viewer failed. Continuing training.")

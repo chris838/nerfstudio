@@ -345,6 +345,22 @@ class ViewerState:
                 self.last_step = step
                 self.render_statemachine.action(RenderAction("step", self.camera_message))
 
+    def update_metrics(self, metrics_dict: dict):
+        """update the viewer with training metrics
+
+        Args:
+            metrics_dict: dictionary of training metrics
+        """
+        if "ray_sample" in metrics_dict:
+            ray_sample = metrics_dict["ray_sample"]
+            self.viser_server.add_ray_sample(
+                origin=ray_sample["origin"],
+                direction=ray_sample["direction"],
+                near=ray_sample["near"],
+                far=ray_sample["far"],
+                center=ray_sample["center"],
+            )
+
     def update_colormap_options(self, dimensions: int, dtype: type) -> None:
         """update the colormap options based on the current render
 

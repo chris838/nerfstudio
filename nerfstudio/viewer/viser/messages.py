@@ -20,10 +20,11 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Tuple
 
-import viser.infra
-from typing_extensions import Literal, override
 import numpy as onp
 import numpy.typing as onpt
+import viser.infra
+from typing_extensions import Literal, override
+
 
 class NerfstudioMessage(viser.infra.Message):
     """Base message type for controlling our viewer."""
@@ -31,7 +32,6 @@ class NerfstudioMessage(viser.infra.Message):
     @override
     def redundancy_key(self) -> str:
         return type(self).__name__
-
 
 
 @dataclasses.dataclass
@@ -50,6 +50,23 @@ class MeshMessage(NerfstudioMessage):
         # Check shapes.
         assert self.vertices.shape[-1] == 3
         assert self.faces.shape[-1] == 3
+
+
+@dataclasses.dataclass
+class RayMessage(NerfstudioMessage):
+    """Ray message."""
+
+    origin: onpt.NDArray[onp.float32]
+    direction: onpt.NDArray[onp.float32]
+    near: onp.float32
+    far: onp.float32
+    center: onpt.NDArray[onp.float32]
+
+    def __post_init__(self):
+        # Check shapes.
+        assert self.origin.shape[0] == 3
+        assert self.direction.shape[0] == 3
+        assert self.center.shape[0] == 3
 
 
 @dataclasses.dataclass
