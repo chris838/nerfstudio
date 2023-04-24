@@ -298,9 +298,8 @@ class ViewerState:
         self.viser_server.update_scene_box(dataset.scene_box)
 
         # draw the mesh
-        if "mesh_filename" in dataset.metadata:
-            mesh_filename = dataset.metadata["mesh_filename"]
-            mesh = trimesh.load_mesh(mesh_filename)
+        if "mesh" in dataset.metadata:
+            mesh = dataset.metadata["mesh"]
             assert isinstance(mesh, trimesh.Trimesh)
             vertices = mesh.vertices
             faces = mesh.faces
