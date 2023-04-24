@@ -433,7 +433,11 @@ class MessageApi(abc.ABC):
         """Add a visualisation of a sample ray to the scene."""
         self._queue(
             messages.RayMessage(
-                origin, direction, near, far, center
+                origin.tolist(),
+                direction.tolist(),
+                near.tolist(),
+                far.tolist(),
+                center.tolist(),
             )
         )
 

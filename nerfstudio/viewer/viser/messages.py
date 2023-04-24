@@ -56,17 +56,11 @@ class MeshMessage(NerfstudioMessage):
 class RayMessage(NerfstudioMessage):
     """Ray message."""
 
-    origin: onpt.NDArray[onp.float32]
-    direction: onpt.NDArray[onp.float32]
-    near: onp.float32
-    far: onp.float32
-    center: onpt.NDArray[onp.float32]
-
-    def __post_init__(self):
-        # Check shapes.
-        assert self.origin.shape[0] == 3
-        assert self.direction.shape[0] == 3
-        assert self.center.shape[0] == 3
+    origin: Tuple[float, float, float]
+    direction: Tuple[float, float, float]
+    near: float
+    far:float
+    center: Tuple[float, float, float]
 
 
 @dataclasses.dataclass
