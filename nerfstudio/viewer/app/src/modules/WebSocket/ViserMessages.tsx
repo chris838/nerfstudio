@@ -13,8 +13,6 @@ interface RayMessage {
   type: 'RayMessage';
   origin: [number, number, number];
   direction: [number, number, number];
-  near: number;
-  far: number;
   center: [number, number, number];
 }
 interface BackgroundImageMessage {

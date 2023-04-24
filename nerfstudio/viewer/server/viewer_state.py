@@ -356,8 +356,6 @@ class ViewerState:
             self.viser_server.add_ray_sample(
                 origin=ray_sample["origin"],
                 direction=ray_sample["direction"],
-                near=ray_sample["near"],
-                far=ray_sample["far"],
                 center=ray_sample["center"],
             )
 

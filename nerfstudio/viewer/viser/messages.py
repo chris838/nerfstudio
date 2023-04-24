@@ -58,8 +58,6 @@ class RayMessage(NerfstudioMessage):
 
     origin: Tuple[float, float, float]
     direction: Tuple[float, float, float]
-    near: float
-    far:float
     center: Tuple[float, float, float]
 
 

@@ -426,8 +426,6 @@ class MessageApi(abc.ABC):
         self,
         origin,
         direction,
-        near,
-        far,
         center,
     ) -> None:
         """Add a visualisation of a sample ray to the scene."""
@@ -435,8 +433,6 @@ class MessageApi(abc.ABC):
             messages.RayMessage(
                 origin.tolist(),
                 direction.tolist(),
-                near.tolist(),
-                far.tolist(),
                 center.tolist(),
             )
         )
