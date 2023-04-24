@@ -64,6 +64,15 @@ function handleMessage(
       });
       break;
     }
+    // Add ray
+    case 'RayMessage': {
+      dispatch({
+        type: 'write',
+        path: 'sceneState/ray',
+        data: message,
+      });
+      break;
+    }
     // Add a background image.
     case 'BackgroundImageMessage': {
       document

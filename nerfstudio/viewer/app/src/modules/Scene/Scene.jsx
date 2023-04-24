@@ -6,7 +6,7 @@ import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { useDispatch } from 'react-redux';
-import { drawMesh, drawCamera, drawSceneBox } from './drawing';
+import { drawMesh, drawRay, drawCamera, drawSceneBox } from './drawing';
 
 import { CameraHelper } from '../SidePanel/CameraPanel/CameraHelper';
 import SceneNode from '../../SceneNode';
@@ -14,6 +14,7 @@ import { subscribe_to_changes } from '../../subscriber';
 import { snap_to_camera } from '../SidePanel/SidePanel';
 
 const MESH_NAME = 'Mesh';
+const RAY_NAME = 'Ray';
 const SCENE_BOX_NAME = 'Scene Box';
 const CAMERAS_NAME = 'Training Cameras';
 
@@ -245,12 +246,24 @@ export function get_scene_tree() {
     if (current !== null) {
       const mesh = drawMesh(current);
       sceneTree.set_object_from_path([MESH_NAME], mesh);
-      console.log(sceneTree)
     } else {
       sceneTree.delete([MESH_NAME]);
     }
   };
   subscribe_to_changes(selector_fn_mesh, fn_value_mesh);
+
+  // draw ray
+  const selector_fn_ray = (state) => {
+    return state.sceneState.ray;
+  };
+  const fn_value_ray = (previous, current) => {
+    if (current !== null) {
+      const ray = drawRay(current);
+      const ray_id = Math.random();
+      sceneTree.set_object_from_path([RAY_NAME, ray_id], ray);
+    }
+  };
+  subscribe_to_changes(selector_fn_ray, fn_value_ray);
 
   // draw scene box
   const selector_fn_scene_box = (state) => {

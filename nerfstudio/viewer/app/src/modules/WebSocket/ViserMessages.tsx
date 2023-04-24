@@ -2,12 +2,20 @@
 // This file should not be manually modified.
 type ArrayBuffer = Uint8Array;
 interface MeshMessage {
-  type: "MeshMessage";
+  type: 'MeshMessage';
   name: string;
   vertices: ArrayBuffer;
   faces: ArrayBuffer;
   color: number;
   wireframe: boolean;
+}
+interface RayMessage {
+  type: 'RayMessage';
+  origin: [number, number, number];
+  direction: [number, number, number];
+  near: number;
+  far: number;
+  center: [number, number, number];
 }
 interface BackgroundImageMessage {
   type: 'BackgroundImageMessage';
@@ -128,6 +136,7 @@ interface TimeConditionMessage {
 
 export type Message =
   | MeshMessage
+  | RayMessage
   | BackgroundImageMessage
   | GuiAddMessage
   | GuiRemoveMessage
